@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">SQL_teste</string>
+    <string name="sql">string/sql</string>
+</resources>
