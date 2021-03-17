@@ -5,6 +5,7 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -15,10 +16,15 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Timer;
+import java.util.TimerTask;
+
 
 public class MainActivity extends AppCompatActivity {
 
     private TextView textView;
+    TextView timerText;
+    Button stopStartButton;
 
     private static String ip = "192.168.0.20";
     private static String port = "1433";
@@ -38,6 +44,12 @@ public class MainActivity extends AppCompatActivity {
     private TextView textView9;
     private TextView textView10;
     private TextView textView0;
+
+    Timer timer;
+    TimerTask timerTask;
+    Double time = 0.0;
+
+    boolean timerStarted = false;
 
 
     @Override
@@ -70,6 +82,10 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
             textView0.setText("FALHA!");
         }
+        timer = new Timer();
+
+        timerText = (TextView) findViewById(R.id.timerText);
+        stopStartButton = (Button) findViewById(R.id.startStopButton);
     }
     public void sqlButton(View view){
         if (connection!=null){
@@ -175,5 +191,67 @@ public class MainActivity extends AppCompatActivity {
         else {
             textView0.setText("Connection is null");
         }
+    }
+
+
+    public void startStopTapped(View view)
+    {
+        if(timerStarted == false)
+        {
+            timerStarted = true;
+            setButtonUI("Parar Contagem");
+
+            startTimer();
+        }
+        else
+        {
+            timerStarted = false;
+            setButtonUI("Iniciar Contagem");
+
+            timerTask.cancel();
+        }
+    }
+
+    private void startTimer()
+    {
+        timerTask = new TimerTask()
+        {
+            @Override
+            public void run()
+            {
+                runOnUiThread(new Runnable()
+                {
+                    @Override
+                    public void run()
+                    {
+                        time++;
+                        timerText.setText(getTimerText());
+                    }
+                });
+            }
+
+        };
+        timer.scheduleAtFixedRate(timerTask, 0 ,1000);
+    }
+
+    private String getTimerText()
+    {
+        int rounded = (int) Math.round(time);
+
+        int seconds = ((rounded % 86400) % 3600) % 60;
+        int minutes = ((rounded % 86400) % 3600) / 60;
+        int hours = ((rounded % 86400) / 3600);
+
+        return formatTime(seconds, minutes, hours);
+    }
+
+    private void setButtonUI(String start)
+    {
+        stopStartButton.setText(start);
+    }
+
+    private String formatTime(int seconds, int minutes, int hours)
+    {
+        return String.format("%02d",hours) + " : " + String.format("%02d",minutes) + " : " + String.format("%02d",seconds);
     }
 }
