@@ -13,6 +13,7 @@ import androidx.core.app.ActivityCompat;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -26,7 +27,7 @@ public class MainActivity extends AppCompatActivity {
     TextView timerText;
     Button stopStartButton;
 
-    private static String ip = "192.168.0.20";
+    private static String ip = "192.168.0.13";
     private static String port = "1433";
     private static String Classes = "net.sourceforge.jtds.jdbc.Driver";
     private static String database = "SENSOR_MOTOR";
@@ -44,6 +45,9 @@ public class MainActivity extends AppCompatActivity {
     private TextView textView9;
     private TextView textView10;
     private TextView textView0;
+    private TextView Horimetro;
+
+
 
     Timer timer;
     TimerTask timerTask;
@@ -68,6 +72,7 @@ public class MainActivity extends AppCompatActivity {
         textView9 = findViewById(R.id.textView9);
         textView10 = findViewById(R.id.textView10);
         textView0 = findViewById(R.id.textView0);
+        Horimetro = findViewById(R.id.Horimetro);
 
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
@@ -187,6 +192,18 @@ public class MainActivity extends AppCompatActivity {
             } catch (SQLException e) {
                 e.printStackTrace();
             }
+
+            try {
+                statement = connection.createStatement();
+                ResultSet resultSet = statement.executeQuery("SELECT CONVERT(VARCHAR, ROUND(SUM(FVALUE)/3600,2)) + ' h' FROM DATA WHERE ID_SENSOR=12");
+
+                while (resultSet.next()){
+                    Horimetro.setText(resultSet.getString(1));
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
         }
         else {
             textView0.setText("Connection is null");
@@ -196,6 +213,8 @@ public class MainActivity extends AppCompatActivity {
 
     public void startStopTapped(View view)
     {
+
+        Statement statement = null;
         if(timerStarted == false)
         {
             timerStarted = true;
@@ -209,6 +228,26 @@ public class MainActivity extends AppCompatActivity {
             setButtonUI("Iniciar Contagem");
 
             timerTask.cancel();
+            int resposta = 0;
+            try {
+            //statement = connection.createStatement();
+
+            PreparedStatement pst = connection.prepareStatement("INSERT INTO DATA (FVALUE, ID_SENSOR)" + "VALUES (?,12)");
+                pst.setString(1, getTimerText());
+
+
+            //ResultSet resultSet = statement.executeQuery("INSERT INTO DATA (IVALUE, ID_SENSOR) VALUES (2,12)");
+                resposta = pst.executeUpdate();
+
+
+
+            }catch (Exception e){
+                e.getMessage();
+
+            //catch (SQLException e) {
+                //e.printStackTrace();
+            }
+
         }
     }
 
@@ -242,7 +281,8 @@ public class MainActivity extends AppCompatActivity {
         int minutes = ((rounded % 86400) % 3600) / 60;
         int hours = ((rounded % 86400) / 3600);
 
-        return formatTime(seconds, minutes, hours);
+        //return formatTime(seconds, minutes, hours);
+        return String.format("%06d",rounded);
     }
 
     private void setButtonUI(String start)
@@ -252,6 +292,8 @@ public class MainActivity extends AppCompatActivity {
 
     private String formatTime(int seconds, int minutes, int hours)
     {
-        return String.format("%02d",hours) + " : " + String.format("%02d",minutes) + " : " + String.format("%02d",seconds);
+        //return String.format("%02d",hours) + " : " + String.format("%02d",minutes) + " : " + String.format("%02d",seconds);
+        return String.format("%02d",hours) +  String.format("%02d",minutes) + String.format("%02d",seconds);
+
     }
 }
