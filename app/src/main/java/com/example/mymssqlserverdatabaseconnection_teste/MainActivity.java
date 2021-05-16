@@ -238,16 +238,13 @@ public class MainActivity extends AppCompatActivity {
                 resposta = pst.executeUpdate();
 
 
-                if(timerTask != null)
-                {
-                    timerTask.cancel();
-                    //setButtonUI("START", R.color.green);
-                    time = 0.0;
-                    timerStarted = false;
-                    timerText.setText(formatTime(0,0,0));
-
-                }
-
+                            if (timerTask != null) {
+                            timerTask.cancel();
+                            //setButtonUI("START", R.color.green);
+                            time = 0.0;
+                            timerStarted = false;
+                            timerText.setText(formatTime(0, 0, 0));
+                            }
 
             }catch (Exception e){
                 e.getMessage();
