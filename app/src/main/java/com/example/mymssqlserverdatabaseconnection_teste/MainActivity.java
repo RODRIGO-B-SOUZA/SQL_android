@@ -27,7 +27,7 @@ public class MainActivity extends AppCompatActivity {
     TextView timerText;
     Button stopStartButton;
 
-    private static String ip = "192.168.0.13";
+    private static String ip = "192.168.1.111";
     private static String port = "1433";
     private static String Classes = "net.sourceforge.jtds.jdbc.Driver";
     private static String database = "SENSOR_MOTOR";
@@ -230,22 +230,28 @@ public class MainActivity extends AppCompatActivity {
             timerTask.cancel();
             int resposta = 0;
             try {
-            //statement = connection.createStatement();
+
 
             PreparedStatement pst = connection.prepareStatement("INSERT INTO DATA (FVALUE, ID_SENSOR)" + "VALUES (?,12)");
                 pst.setString(1, getTimerText());
 
-
-            //ResultSet resultSet = statement.executeQuery("INSERT INTO DATA (IVALUE, ID_SENSOR) VALUES (2,12)");
                 resposta = pst.executeUpdate();
 
+
+                if(timerTask != null)
+                {
+                    timerTask.cancel();
+                    //setButtonUI("START", R.color.green);
+                    time = 0.0;
+                    timerStarted = false;
+                    timerText.setText(formatTime(0,0,0));
+
+                }
 
 
             }catch (Exception e){
                 e.getMessage();
 
-            //catch (SQLException e) {
-                //e.printStackTrace();
             }
 
         }
